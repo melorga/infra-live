@@ -9,10 +9,10 @@ locals {
   service     = length(local.path_parts) > 2 ? local.path_parts[2] : null
 
   # Load environment-specific variables
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
+  env_vars = try(read_terragrunt_config(find_in_parent_folders("env.hcl", "env.hcl.notfound")), { inputs = {} })
 
   # Load region-specific variables  
-  region_vars = try(read_terragrunt_config(find_in_parent_folders("region.hcl")), {inputs = {}})
+  region_vars = try(read_terragrunt_config(find_in_parent_folders("region.hcl")), { inputs = {} })
 
   # Common tags applied to all resources
   common_tags = {
@@ -28,11 +28,11 @@ locals {
 remote_state {
   backend = "s3"
   config = {
-    bucket         = "${local.env_vars.inputs.project_name}-terraform-state-${local.environment}-${local.region}"
+    bucket         = "${try(local.env_vars.inputs.project_name, "infra-live")}-terraform-state-${local.environment}-${local.region}"
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = local.region
     encrypt        = true
-    dynamodb_table = "${local.env_vars.inputs.project_name}-terraform-locks-${local.environment}-${local.region}"
+    dynamodb_table = "${try(local.env_vars.inputs.project_name, "infra-live")}-terraform-locks-${local.environment}-${local.region}"
 
     s3_bucket_tags      = local.common_tags
     dynamodb_table_tags = local.common_tags
@@ -82,8 +82,8 @@ EOF
 
 # Configure inputs that all child configurations inherit
 inputs = merge(
-  local.env_vars.inputs,
-  local.region_vars.inputs,
+  try(local.env_vars.inputs, {}),
+  try(local.region_vars.inputs, {}),
   {
     environment = local.environment
     region      = local.region
