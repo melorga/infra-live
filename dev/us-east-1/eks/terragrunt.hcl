@@ -4,7 +4,7 @@
 # first-party eks module, swap to:
 #   source = "${include.root.locals.module_base_path}/eks?ref=<tag>"
 terraform {
-  source = "tfr:///terraform-aws-modules/eks/aws?version=21.0.0"
+  source = "tfr:///terraform-aws-modules/eks/aws?version=21.19.0"
 }
 
 include "root" {
