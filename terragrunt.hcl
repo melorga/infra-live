@@ -1,7 +1,11 @@
 # Root terragrunt.hcl
 # This is the root configuration that all child configurations inherit from.
 
-terragrunt_version_constraint  = ">= 0.67"
+# Terragrunt 1.0 (released May 2026) introduced breaking changes — notably
+# the new CAS (Content-Addressable Store), hcl fmt, and experiments framework.
+# See https://terragrunt.gruntwork.io/docs/migrate/migrating-from-0xx/ for
+# upgrade guidance before bumping local installs.
+terragrunt_version_constraint  = ">= 1.0"
 terraform_version_constraint   = ">= 1.9, < 2.0"
 
 locals {
