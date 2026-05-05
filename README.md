@@ -78,8 +78,8 @@ make validate    # run-all validate across dev/stage/prod
 ## Prerequisites
 
 1. AWS CLI configured (or assumed role via OIDC for CI).
-2. Terraform `>= 1.9, < 2.0`.
-3. Terragrunt `>= 0.67`.
+2. Terraform `>= 1.9, < 2.0` (CI pins `1.15.1`).
+3. Terragrunt `>= 1.0` (CI pins `1.0.3`).
 4. AWS permissions sufficient to create the resources in question.
 
 ## Cloning
@@ -87,3 +87,21 @@ make validate    # run-all validate across dev/stage/prod
 ```bash
 git clone https://github.com/melorga/infra-live.git
 ```
+
+## Recent changes
+
+- **Terragrunt `0.67.16` -> `1.0.3`** — root `terragrunt_version_constraint`
+  bumped to `>= 1.0`. Terragrunt 1.0 introduced breaking changes (CAS,
+  hcl fmt, experiments). See the
+  [migration guide](https://terragrunt.gruntwork.io/docs/migrate/migrating-from-0xx/).
+- **Terraform `1.9.8` -> `1.15.1`** — within the existing
+  `>= 1.9, < 2.0` constraint; CI pin updated.
+- **`terraform-aws-modules/vpc/aws` `5.21.0` -> `6.6.1`** — major bump,
+  applied across dev/stage/prod. See
+  [UPGRADE-6.0.md](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/UPGRADE-6.0.md).
+- **`terraform-aws-modules/rds/aws` `6.10.0` -> `7.2.0`** — major bump
+  (highest-risk change in this repo). See the
+  [v7.0.0 release notes](https://github.com/terraform-aws-modules/terraform-aws-rds/releases/tag/v7.0.0).
+- **`terraform-aws-modules/eks/aws` `21.0.0` -> `21.19.0`** — patch bump
+  within the v21 major.
+- **`actions/checkout` `v4` -> `v6`** in the live workflow.
