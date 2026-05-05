@@ -1,60 +1,72 @@
 .DEFAULT_GOAL := help
-.PHONY: help init plan apply destroy validate format
+.PHONY: help init plan apply destroy validate format clean clean-plans \
+        plan-dev plan-stage plan-prod apply-dev apply-stage apply-prod \
+        validate-dev validate-stage validate-prod
 
 # Variables
 ENV ?= dev
 REGION ?= us-east-1
-SERVICE ?= network
+SERVICE ?= vpc
 
-# Help target
 help: ## Show this help message
 	@echo "Available targets:"
-	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-init: ## Initialize Terragrunt for specified environment/region/service
-	@echo "Initializing $(ENV)/$(REGION)/$(SERVICE)..."
+# ----- single-stack targets -----
+
+init: ## Initialize a single stack: ENV/REGION/SERVICE
 	cd $(ENV)/$(REGION)/$(SERVICE) && terragrunt init
 
-plan: ## Plan Terragrunt for specified environment/region/service
-	@echo "Planning $(ENV)/$(REGION)/$(SERVICE)..."
+plan: ## Plan a single stack: ENV/REGION/SERVICE
 	cd $(ENV)/$(REGION)/$(SERVICE) && terragrunt plan
 
-apply: ## Apply Terragrunt for specified environment/region/service
-	@echo "Applying $(ENV)/$(REGION)/$(SERVICE)..."
+apply: ## Apply a single stack: ENV/REGION/SERVICE
 	cd $(ENV)/$(REGION)/$(SERVICE) && terragrunt apply
 
-destroy: ## Destroy Terragrunt for specified environment/region/service
-	@echo "Destroying $(ENV)/$(REGION)/$(SERVICE)..."
+destroy: ## Destroy a single stack: ENV/REGION/SERVICE
 	cd $(ENV)/$(REGION)/$(SERVICE) && terragrunt destroy
 
-validate: ## Validate all Terragrunt configurations
-	@echo "Validating all configurations..."
-	terragrunt validate-all
+# ----- whole-tree targets (run-all replaces deprecated *-all) -----
 
-format: ## Format all Terragrunt files
-	@echo "Formatting all .hcl files..."
+validate: ## Validate every stack in dev/stage/prod
+	@for env in dev stage prod; do \
+	  echo "==> $$env"; \
+	  (cd $$env && terragrunt run-all validate) || exit 1; \
+	done
+
+plan-dev: ## run-all plan for dev/$(REGION)
+	cd dev/$(REGION) && terragrunt run-all plan
+
+plan-stage: ## run-all plan for stage/$(REGION)
+	cd stage/$(REGION) && terragrunt run-all plan
+
+plan-prod: ## run-all plan for prod/$(REGION)
+	cd prod/$(REGION) && terragrunt run-all plan
+
+apply-dev: ## run-all apply for dev/$(REGION)
+	cd dev/$(REGION) && terragrunt run-all apply
+
+apply-stage: ## run-all apply for stage/$(REGION)
+	cd stage/$(REGION) && terragrunt run-all apply
+
+apply-prod: ## run-all apply for prod/$(REGION)
+	cd prod/$(REGION) && terragrunt run-all apply
+
+validate-dev: ## run-all validate for dev/$(REGION)
+	cd dev/$(REGION) && terragrunt run-all validate
+
+validate-stage: ## run-all validate for stage/$(REGION)
+	cd stage/$(REGION) && terragrunt run-all validate
+
+validate-prod: ## run-all validate for prod/$(REGION)
+	cd prod/$(REGION) && terragrunt run-all validate
+
+# ----- formatting & cleanup -----
+
+format: ## Format all .hcl files
 	terragrunt hclfmt
 
-plan-all: ## Plan all environments
-	@echo "Planning all environments..."
-	terragrunt plan-all
-
-# Environment-specific targets
-plan-prod: ## Plan production environment
-	$(MAKE) ENV=prod REGION=us-east-1 plan-all
-
-plan-stage: ## Plan staging environment
-	$(MAKE) ENV=stage REGION=us-east-1 plan-all
-
-# Quick deployment targets
-deploy-network: ## Deploy network infrastructure
-	$(MAKE) ENV=$(ENV) REGION=$(REGION) SERVICE=network apply
-
-deploy-compute: ## Deploy compute infrastructure
-	$(MAKE) ENV=$(ENV) REGION=$(REGION) SERVICE=compute apply
-
-# Cleanup targets
-clean: ## Remove .terragrunt-cache directories
+clean: ## Remove all .terragrunt-cache directories
 	find . -type d -name ".terragrunt-cache" -exec rm -rf {} +
 
 clean-plans: ## Remove all plan files
