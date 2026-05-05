@@ -3,8 +3,14 @@
 # Source: public registry module. When melorga/iac-modules ships a
 # first-party rds module, swap to:
 #   source = "${include.root.locals.module_base_path}/rds?ref=<tag>"
+#
+# v7 introduced breaking changes — see https://github.com/terraform-aws-modules/terraform-aws-rds/releases/tag/v7.0.0
+# TODO(audit): this is the highest-risk bump in this repo. Review the v7
+# release notes for input renames before the next apply (engine_version,
+# manage_master_user_password / master_user_secret_kms_key_id, and the
+# enhanced monitoring inputs are particularly worth double-checking).
 terraform {
-  source = "tfr:///terraform-aws-modules/rds/aws?version=6.10.0"
+  source = "tfr:///terraform-aws-modules/rds/aws?version=7.2.0"
 }
 
 include "root" {
