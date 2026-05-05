@@ -26,8 +26,8 @@ permissions:
   pull-requests: write
 
 env:
-  TERRAGRUNT_VERSION: '0.67.16'
-  TERRAFORM_VERSION: '1.9.8'
+  TERRAGRUNT_VERSION: '1.0.3'
+  TERRAFORM_VERSION: '1.15.1'
 
 jobs:
   detect-changes:
@@ -39,7 +39,7 @@ jobs:
       prod-changed: ${{ steps.changes.outputs.prod }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -80,8 +80,8 @@ jobs:
       cancel-in-progress: false
     uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
     with:
-      terragrunt_version: '0.67.16'
-      terraform_version: '1.9.8'
+      terragrunt_version: '1.0.3'
+      terraform_version: '1.15.1'
       working_directory: './dev/us-east-1'
       environment: 'development'
       # PR = plan only, push to main = apply via run-all
@@ -98,8 +98,8 @@ jobs:
       cancel-in-progress: false
     uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
     with:
-      terragrunt_version: '0.67.16'
-      terraform_version: '1.9.8'
+      terragrunt_version: '1.0.3'
+      terraform_version: '1.15.1'
       working_directory: './stage/us-east-1'
       environment: 'staging'
       command: ${{ github.event_name == 'pull_request' && 'run-all plan' || 'run-all apply' }}
@@ -118,8 +118,8 @@ jobs:
       cancel-in-progress: false
     uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
     with:
-      terragrunt_version: '0.67.16'
-      terraform_version: '1.9.8'
+      terragrunt_version: '1.0.3'
+      terraform_version: '1.15.1'
       working_directory: './prod/us-east-1'
       environment: 'production'
       command: ${{ github.event_name == 'pull_request' && 'run-all plan' || 'run-all apply' }}
