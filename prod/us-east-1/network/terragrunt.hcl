@@ -3,8 +3,11 @@
 # Source: public registry module. When melorga/iac-modules ships a
 # first-party vpc-network module, swap to:
 #   source = "${include.root.locals.module_base_path}/vpc-network?ref=<tag>"
+#
+# v6 introduced breaking changes — see https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/UPGRADE-6.0.md
+# TODO(audit): review v5 -> v6 upgrade guide for any input renames beyond the common ones in use here.
 terraform {
-  source = "tfr:///terraform-aws-modules/vpc/aws?version=5.21.0"
+  source = "tfr:///terraform-aws-modules/vpc/aws?version=6.6.1"
 }
 
 include "root" {
