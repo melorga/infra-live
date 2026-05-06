@@ -1,23 +1,33 @@
 # RDS Terragrunt configuration
+#
+# Source: public registry module. When melorga/iac-modules ships a
+# first-party rds module, swap to:
+#   source = "${include.root.locals.module_base_path}/rds?ref=<tag>"
+#
+# v7 introduced breaking changes — see https://github.com/terraform-aws-modules/terraform-aws-rds/releases/tag/v7.0.0
+# TODO(audit): this is the highest-risk bump in this repo. Review the v7
+# release notes for input renames before the next apply (engine_version,
+# manage_master_user_password / master_user_secret_kms_key_id, and the
+# enhanced monitoring inputs are particularly worth double-checking).
+terraform {
+  source = "tfr:///terraform-aws-modules/rds/aws?version=7.2.0"
+}
 
-# Include root terragrunt configuration
 include "root" {
   path = find_in_parent_folders()
 }
 
-# Include environment configuration
 include "env" {
   path   = find_in_parent_folders("env.hcl")
   expose = true
 }
 
-# Include region configuration
 include "region" {
   path   = find_in_parent_folders("region.hcl")
   expose = true
 }
 
-# Dependencies - RDS depends on VPC
+# RDS depends on VPC for the database subnet group
 dependency "vpc" {
   config_path = "../vpc"
 
@@ -25,103 +35,49 @@ dependency "vpc" {
     vpc_id                     = "vpc-mock"
     database_subnets           = ["subnet-mock-db-1", "subnet-mock-db-2"]
     database_subnet_group_name = "mock-db-subnet-group"
-    vpc_security_group_ids     = ["sg-mock"]
+    private_subnets_cidr_blocks = ["10.10.11.0/24", "10.10.12.0/24"]
   }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
 }
 
-# Terraform module source
-terraform {
-  source = "${include.root.locals.module_base_path}/rds"
-}
-
-# Input variables for the RDS module
 inputs = {
-  # Basic configuration
   identifier = "${include.env.locals.env_vars.name_prefix}-postgres"
 
-  # Engine configuration
-  engine         = "postgres"
-  engine_version = "15.4"
-  instance_class = include.env.locals.env_vars.instance_types.rds_instance_class
+  engine            = "postgres"
+  engine_version    = "15.7"
+  family            = "postgres15"
+  major_engine_version = "15"
+  instance_class    = include.env.locals.instance_types.rds_instance_class
 
-  # Storage configuration
-  allocated_storage     = include.env.locals.env_vars.storage.rds_allocated_storage
-  max_allocated_storage = include.env.locals.env_vars.storage.rds_allocated_storage * 2
+  allocated_storage     = include.env.locals.storage.rds_allocated_storage
+  max_allocated_storage = include.env.locals.storage.rds_allocated_storage * 2
   storage_type          = "gp3"
-  storage_encrypted     = include.env.locals.env_vars.storage.rds_storage_encrypted
+  storage_encrypted     = include.env.locals.storage.rds_storage_encrypted
 
-  # Database configuration
   db_name  = "portfoliodb"
   username = "dbadmin"
   port     = 5432
 
-  # Password will be managed by AWS Secrets Manager
-  manage_master_user_password   = true
-  master_user_secret_kms_key_id = null # Use default AWS managed key
+  manage_master_user_password = true
 
-  # Network configuration
   db_subnet_group_name   = dependency.vpc.outputs.database_subnet_group_name
-  vpc_security_group_ids = [] # Will be created by the module
+  create_db_subnet_group = false
 
-  # Create security group
-  create_db_subnet_group = false # Use the one from VPC module
+  vpc_security_group_ids = []
 
-  # Security group configuration
-  create_security_group      = true
-  security_group_name        = "${include.env.locals.env_vars.name_prefix}-rds-sg"
-  security_group_description = "Security group for ${include.env.locals.env_vars.name_prefix} RDS instance"
+  multi_az = false
 
-  # Security group rules
-  ingress_cidr_blocks = [] # No direct CIDR access
-  ingress_rules       = []
+  backup_retention_period = include.env.locals.backup.rds_backup_retention_period
+  backup_window           = include.env.locals.backup.rds_backup_window
+  maintenance_window      = include.env.locals.backup.rds_maintenance_window
+  copy_tags_to_snapshot   = true
 
-  # Custom ingress rules for EKS nodes
-  ingress_with_source_security_group_id = [
-    {
-      description              = "PostgreSQL access from EKS nodes"
-      from_port                = 5432
-      to_port                  = 5432
-      protocol                 = "tcp"
-      source_security_group_id = null # Will be populated by EKS module output
-    }
-  ]
-
-  # High availability configuration
-  multi_az = false # Single AZ for dev environment
-
-  # Backup configuration
-  backup_retention_period  = include.env.locals.env_vars.backup.rds_backup_retention_period
-  backup_window            = include.env.locals.env_vars.backup.rds_backup_window
-  copy_tags_to_snapshot    = true
-  delete_automated_backups = true
-
-  # Maintenance configuration
-  maintenance_window         = include.env.locals.env_vars.backup.rds_maintenance_window
-  auto_minor_version_upgrade = true
-
-  # Deletion protection
-  deletion_protection              = include.env.locals.env_vars.security.deletion_protection
-  skip_final_snapshot              = !include.env.locals.env_vars.security.deletion_protection
+  deletion_protection      = include.env.locals.security.deletion_protection
+  skip_final_snapshot      = !include.env.locals.security.deletion_protection
   final_snapshot_identifier_prefix = "${include.env.locals.env_vars.name_prefix}-final-snapshot"
 
-  # Monitoring configuration
-  monitoring_interval = 0 # Disable enhanced monitoring for dev
-  monitoring_role_arn = null
+  performance_insights_enabled = false
+  monitoring_interval          = 0
 
-  # Performance Insights
-  performance_insights_enabled = false # Disabled for dev environment
-
-  # CloudWatch logs
   enabled_cloudwatch_logs_exports = ["postgresql"]
-
-  # Parameters
-  family = "postgres15"
-
-  # Major version upgrade
-  allow_major_version_upgrade = false
-
-  # Character set (not applicable to PostgreSQL)
-  character_set_name = null
-
-  # Common tags will be inherited from root configuration
 }

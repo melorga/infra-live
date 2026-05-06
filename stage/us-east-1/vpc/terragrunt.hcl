@@ -1,4 +1,4 @@
-# VPC infrastructure for dev us-east-1
+# VPC infrastructure for stage us-east-1
 #
 # Source: public registry module. When melorga/iac-modules ships a
 # first-party vpc-network module, swap to:
@@ -26,17 +26,17 @@ include "region" {
 
 inputs = {
   name = "${include.env.locals.env_vars.name_prefix}-vpc"
-  cidr = "10.10.0.0/16"
+  cidr = "10.20.0.0/16"
 
-  azs             = ["us-east-1a", "us-east-1b"]
-  public_subnets  = ["10.10.1.0/24", "10.10.2.0/24"]
-  private_subnets = ["10.10.11.0/24", "10.10.12.0/24"]
-  database_subnets = ["10.10.21.0/24", "10.10.22.0/24"]
+  azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  public_subnets   = ["10.20.1.0/24", "10.20.2.0/24", "10.20.3.0/24"]
+  private_subnets  = ["10.20.11.0/24", "10.20.12.0/24", "10.20.13.0/24"]
+  database_subnets = ["10.20.21.0/24", "10.20.22.0/24", "10.20.23.0/24"]
 
   create_database_subnet_group = true
 
   enable_nat_gateway   = true
-  single_nat_gateway   = true # Single NAT for dev cost savings
+  single_nat_gateway   = true # cost savings for non-prod
   enable_vpn_gateway   = false
   enable_dns_hostnames = true
   enable_dns_support   = true
