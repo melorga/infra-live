@@ -87,7 +87,10 @@ jobs:
       terraform_version: '1.15.1'
       working_directory: './dev/us-east-1'
       environment: 'development'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      # NOTE: ${{ secrets.X }} is NOT allowed in `with:` of a reusable-workflow
+      # call. Use vars.* instead. Set repo variable AWS_OIDC_ROLE_ARN under
+      # Settings -> Secrets and variables -> Actions -> Variables.
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   stage:
@@ -103,7 +106,7 @@ jobs:
       terraform_version: '1.15.1'
       working_directory: './stage/us-east-1'
       environment: 'staging'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   prod:
@@ -121,5 +124,5 @@ jobs:
       terraform_version: '1.15.1'
       working_directory: './prod/us-east-1'
       environment: 'production'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
