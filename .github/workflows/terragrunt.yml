@@ -64,8 +64,12 @@ jobs:
             fi
           done
 
-          # Root terragrunt.hcl change re-plans everything
-          if git diff --name-only "$BASE" HEAD | grep -E '^terragrunt\.hcl$' >/dev/null; then
+          # A change to root terragrunt.hcl OR the workflow file itself
+          # re-plans every environment (workflow change should be validated
+          # against all envs; root tg config is global).
+          if git diff --name-only "$BASE" HEAD \
+              | grep -E '^(terragrunt\.hcl|\.github/workflows/terragrunt\.yml)$' \
+              >/dev/null; then
             echo "dev=true"   >> "$GITHUB_OUTPUT"
             echo "stage=true" >> "$GITHUB_OUTPUT"
             echo "prod=true"  >> "$GITHUB_OUTPUT"
