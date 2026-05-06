@@ -78,16 +78,17 @@ jobs:
     concurrency:
       group: terragrunt-dev-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
+    # Pinned to a specific commit on gha-workflows for reproducibility.
+    # Bump after merging the gha-workflows audit branch and cutting a tag.
+    # Plan/apply gating happens inside the callee based on event_name (PR=plan, push=apply).
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './dev/us-east-1'
       environment: 'development'
-      # PR = plan only, push to main = apply via run-all
-      command: ${{ github.event_name == 'pull_request' && 'run-all plan' || 'run-all apply' }}
-    secrets:
       aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   stage:
     name: Staging Environment
@@ -96,15 +97,14 @@ jobs:
     concurrency:
       group: terragrunt-stage-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './stage/us-east-1'
       environment: 'staging'
-      command: ${{ github.event_name == 'pull_request' && 'run-all plan' || 'run-all apply' }}
-    secrets:
       aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   prod:
     name: Production Environment
@@ -112,16 +112,14 @@ jobs:
     if: needs.detect-changes.outputs.prod-changed == 'true' && (success() || needs.stage.result == 'skipped')
     # Gate prod applies behind the `production` GitHub Environment.
     # Configure required reviewers there (Settings -> Environments).
-    environment: production
     concurrency:
       group: terragrunt-prod-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@claude/audit-portfolio-repos-QH4PL
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './prod/us-east-1'
       environment: 'production'
-      command: ${{ github.event_name == 'pull_request' && 'run-all plan' || 'run-all apply' }}
-    secrets:
       aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
