@@ -85,7 +85,7 @@ jobs:
     # Pinned to a specific commit on gha-workflows for reproducibility.
     # Bump after merging the gha-workflows audit branch and cutting a tag.
     # Plan/apply gating happens inside the callee based on event_name (PR=plan, push=apply).
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@5a58aa5557cdea2b69f3185c786577e4fcc2d29c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@2a72666971eb1e395de3fa03e1dc29cb58e04668
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
@@ -104,7 +104,7 @@ jobs:
     concurrency:
       group: terragrunt-stage-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@5a58aa5557cdea2b69f3185c786577e4fcc2d29c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@2a72666971eb1e395de3fa03e1dc29cb58e04668
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
@@ -122,7 +122,7 @@ jobs:
     concurrency:
       group: terragrunt-prod-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@5a58aa5557cdea2b69f3185c786577e4fcc2d29c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@2a72666971eb1e395de3fa03e1dc29cb58e04668
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
