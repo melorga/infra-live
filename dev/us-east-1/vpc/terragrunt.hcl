@@ -28,9 +28,9 @@ inputs = {
   name = "${include.env.locals.env_vars.name_prefix}-vpc"
   cidr = "10.10.0.0/16"
 
-  azs             = ["us-east-1a", "us-east-1b"]
-  public_subnets  = ["10.10.1.0/24", "10.10.2.0/24"]
-  private_subnets = ["10.10.11.0/24", "10.10.12.0/24"]
+  azs              = ["us-east-1a", "us-east-1b"]
+  public_subnets   = ["10.10.1.0/24", "10.10.2.0/24"]
+  private_subnets  = ["10.10.11.0/24", "10.10.12.0/24"]
   database_subnets = ["10.10.21.0/24", "10.10.22.0/24"]
 
   create_database_subnet_group = true
@@ -41,8 +41,8 @@ inputs = {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  enable_flow_log                      = true
-  create_flow_log_cloudwatch_iam_role  = true
-  create_flow_log_cloudwatch_log_group = true
+  enable_flow_log                                 = true
+  create_flow_log_cloudwatch_iam_role             = true
+  create_flow_log_cloudwatch_log_group            = true
   flow_log_cloudwatch_log_group_retention_in_days = include.env.locals.monitoring.log_retention_days
 }

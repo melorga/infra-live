@@ -64,8 +64,12 @@ jobs:
             fi
           done
 
-          # Root terragrunt.hcl change re-plans everything
-          if git diff --name-only "$BASE" HEAD | grep -E '^terragrunt\.hcl$' >/dev/null; then
+          # A change to root terragrunt.hcl OR the workflow file itself
+          # re-plans every environment (workflow change should be validated
+          # against all envs; root tg config is global).
+          if git diff --name-only "$BASE" HEAD \
+              | grep -E '^(terragrunt\.hcl|\.github/workflows/terragrunt\.yml)$' \
+              >/dev/null; then
             echo "dev=true"   >> "$GITHUB_OUTPUT"
             echo "stage=true" >> "$GITHUB_OUTPUT"
             echo "prod=true"  >> "$GITHUB_OUTPUT"
@@ -81,13 +85,16 @@ jobs:
     # Pinned to a specific commit on gha-workflows for reproducibility.
     # Bump after merging the gha-workflows audit branch and cutting a tag.
     # Plan/apply gating happens inside the callee based on event_name (PR=plan, push=apply).
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@4825faca8f279ea247c07225b85b0f951d66d6f4
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './dev/us-east-1'
       environment: 'development'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      # NOTE: ${{ secrets.X }} is NOT allowed in `with:` of a reusable-workflow
+      # call. Use vars.* instead. Set repo variable AWS_OIDC_ROLE_ARN under
+      # Settings -> Secrets and variables -> Actions -> Variables.
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   stage:
@@ -97,13 +104,13 @@ jobs:
     concurrency:
       group: terragrunt-stage-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@4825faca8f279ea247c07225b85b0f951d66d6f4
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './stage/us-east-1'
       environment: 'staging'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
   prod:
@@ -115,11 +122,11 @@ jobs:
     concurrency:
       group: terragrunt-prod-${{ github.ref }}
       cancel-in-progress: false
-    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@f076d348da88dea26498a45ce537e3b074d6aa4c
+    uses: melorga/gha-workflows/.github/workflows/terragrunt.yml@4825faca8f279ea247c07225b85b0f951d66d6f4
     with:
       terragrunt_version: '1.0.3'
       terraform_version: '1.15.1'
       working_directory: './prod/us-east-1'
       environment: 'production'
-      aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      aws_role_arn: ${{ vars.AWS_OIDC_ROLE_ARN }}
       aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}

@@ -29,11 +29,11 @@ locals {
   }
 
   backup = {
-    rds_backup_window            = "03:00-04:00"
-    rds_maintenance_window       = "sun:04:00-sun:05:00"
-    rds_backup_retention_period  = 14
-    backup_retention_days        = 14
-    enable_backup                = true
+    rds_backup_window           = "03:00-04:00"
+    rds_maintenance_window      = "sun:04:00-sun:05:00"
+    rds_backup_retention_period = 14
+    backup_retention_days       = 14
+    enable_backup               = true
   }
 
   security = {
