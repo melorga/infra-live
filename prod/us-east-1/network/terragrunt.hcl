@@ -41,8 +41,8 @@ inputs = {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  enable_flow_log                      = true
-  create_flow_log_cloudwatch_iam_role  = true
-  create_flow_log_cloudwatch_log_group = true
+  enable_flow_log                                 = true
+  create_flow_log_cloudwatch_iam_role             = true
+  create_flow_log_cloudwatch_log_group            = true
   flow_log_cloudwatch_log_group_retention_in_days = include.env.locals.monitoring.log_retention_days
 }
