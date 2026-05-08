@@ -32,9 +32,9 @@ dependency "vpc" {
   config_path = "../vpc"
 
   mock_outputs = {
-    vpc_id                     = "vpc-mock"
-    database_subnets           = ["subnet-mock-db-1", "subnet-mock-db-2"]
-    database_subnet_group_name = "mock-db-subnet-group"
+    vpc_id                      = "vpc-mock"
+    database_subnets            = ["subnet-mock-db-1", "subnet-mock-db-2"]
+    database_subnet_group_name  = "mock-db-subnet-group"
     private_subnets_cidr_blocks = ["10.10.11.0/24", "10.10.12.0/24"]
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
@@ -43,11 +43,11 @@ dependency "vpc" {
 inputs = {
   identifier = "${include.env.locals.env_vars.name_prefix}-postgres"
 
-  engine            = "postgres"
-  engine_version    = "15.7"
-  family            = "postgres15"
+  engine               = "postgres"
+  engine_version       = "15.7"
+  family               = "postgres15"
   major_engine_version = "15"
-  instance_class    = include.env.locals.instance_types.rds_instance_class
+  instance_class       = include.env.locals.instance_types.rds_instance_class
 
   allocated_storage     = include.env.locals.storage.rds_allocated_storage
   max_allocated_storage = include.env.locals.storage.rds_allocated_storage * 2
@@ -72,8 +72,8 @@ inputs = {
   maintenance_window      = include.env.locals.backup.rds_maintenance_window
   copy_tags_to_snapshot   = true
 
-  deletion_protection      = include.env.locals.security.deletion_protection
-  skip_final_snapshot      = !include.env.locals.security.deletion_protection
+  deletion_protection              = include.env.locals.security.deletion_protection
+  skip_final_snapshot              = !include.env.locals.security.deletion_protection
   final_snapshot_identifier_prefix = "${include.env.locals.env_vars.name_prefix}-final-snapshot"
 
   performance_insights_enabled = false
