@@ -5,8 +5,8 @@
 # the new CAS (Content-Addressable Store), hcl fmt, and experiments framework.
 # See https://terragrunt.gruntwork.io/docs/migrate/migrating-from-0xx/ for
 # upgrade guidance before bumping local installs.
-terragrunt_version_constraint  = ">= 1.0"
-terraform_version_constraint   = ">= 1.9, < 2.0"
+terragrunt_version_constraint = ">= 1.0"
+terraform_version_constraint  = ">= 1.9, < 2.0"
 
 locals {
   # Parse the file path to extract environment and region
