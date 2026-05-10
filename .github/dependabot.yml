@@ -1,43 +1,22 @@
 version: 2
 updates:
-  # Keep GitHub Actions (including the reusable workflow ref) current.
+  # GitHub Actions are the only Dependabot-supported ecosystem in a Terragrunt
+  # repo. Dependabot's `terraform` ecosystem reads `*.tf` files for
+  # `required_providers` / module `source` blocks; it does NOT scan `.hcl`
+  # files. Module sources here live in terragrunt.hcl, so the previous
+  # per-env terraform configs were no-ops and only generated noise.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
     labels:
       - "dependencies"
       - "github-actions"
-
-  # Terraform providers/modules per environment. Dependabot scans for
-  # `required_providers` and module `source` pins under each directory.
-  - package-ecosystem: "terraform"
-    directory: "/dev"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "terraform"
-      - "env:dev"
-
-  - package-ecosystem: "terraform"
-    directory: "/stage"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "terraform"
-      - "env:stage"
-
-  - package-ecosystem: "terraform"
-    directory: "/prod"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "terraform"
-      - "env:prod"
